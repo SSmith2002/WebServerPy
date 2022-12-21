@@ -62,7 +62,7 @@ class WebServer:
                 paramsDict = dict(param.split("=") for param in params)
 
                 if(set(paramsDict.keys()) == set(self.methods[methodName][1])):
-                    result = str(self.methods[methodName][0](paramsDict))
+                    result = str(self.methods[methodName][0](**paramsDict))
                     servResponse = 'HTTP/1.0 200 OK\n\n' + result
                 else:
                     print("ERROR: Params are not suitable for requested method")
@@ -78,3 +78,7 @@ class WebServer:
 #customize error messages
 #account for more errors
     #not passing int as param
+#test with javascript website
+
+
+#rename repo and files

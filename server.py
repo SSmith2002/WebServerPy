@@ -1,16 +1,13 @@
 from webServer import *
 
-def test1(params):
+def test1():
     return "test1"
 
-def test2(params):
+def test2():
     return "test2"
 
-def add(params):
-    num1 = int(params["num1"])
-    num2 = int(params["num2"])
-
-    return num1 + num2
+def add(num1,num2):
+    return int(num1) + int(num2)
 
 def main():
     methods = {"test1":(test1,[]),
