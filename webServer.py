@@ -39,10 +39,11 @@ class WebServer:
         path = os.getcwd()
         files = os.listdir(path)
 
-        if(url == "/"): #change to allow method requests
+        print(url)
+        if(url == "/" or url == ""):
             url = "index.html"
 
-        if(url in files and url[-5:] == ".html"):
+        if(url in files):
             try:
                 file = open(os.getcwd() + "/" + url)
                 fileContent = file.read()
@@ -79,6 +80,6 @@ class WebServer:
 #account for more errors
     #not passing int as param
 #test with javascript website
-
+#prevent server crashing, put in try except
 
 #rename repo and files
