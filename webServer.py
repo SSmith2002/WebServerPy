@@ -2,8 +2,9 @@ import os
 import socket
 
 class WebServer:
-    def __init__(self,port):
+    def __init__(self,port,methods):
         self.port = port
+        self.methods = methods
 
         print('Web Server starting on port: %d...' % (self.port))
 
@@ -30,21 +31,50 @@ class WebServer:
 
     def handleRequest(self,client):
         request = client.recv(1024).decode()
-        headers = request.split('\n')
-        print("Request received: %s" %(headers[0]))
-        fileReq = headers[0].split()[1]
+        request = request.split('\n')[0]
+        print("Request received: %s" %(request))
+        words = request.split()
+        url = words[1][1:]
 
-        if(fileReq == "/" or fileReq[-5:] != ".html"):
-            fileReq = "index.html"
-        try:
-            file = open(os.getcwd() + "/" + fileReq)
-            fileContent = file.read()
-            file.close()
+        path = os.getcwd()
+        files = os.listdir(path)
 
-            servResponse = 'HTTP/1.0 200 OK\n\n' + fileContent
-        except:
-            servResponse = 'HTTP1/0 404 NOT FOUND\n\nFile Not Found'
+        if(url == "/"): #change to allow method requests
+            url = "index.html"
+
+        if(url in files and url[-5:] == ".html"):
+            try:
+                file = open(os.getcwd() + "/" + url)
+                fileContent = file.read()
+                file.close()
+
+                servResponse = 'HTTP/1.0 200 OK\n\n' + fileContent
+            except:
+                servResponse = 'HTTP1/0 404 NOT FOUND\n\nFile Not Found'
+        else:
+            methodParams = url.split("?")
+            methodName = methodParams[0]
+            if(methodName in self.methods.keys()):
+                if(len(methodParams) == 2):
+                    params = methodParams[1].replace("~"," ").split("&")
+                else:
+                    params = []
+                paramsDict = dict(param.split("=") for param in params)
+
+                if(set(paramsDict.keys()) == set(self.methods[methodName][1])):
+                    result = str(self.methods[methodName][0](paramsDict))
+                    servResponse = 'HTTP/1.0 200 OK\n\n' + result
+                else:
+                    print("ERROR: Params are not suitable for requested method")
+                    servResponse = 'HTTP1/0 404 NOT FOUND\n\nFile Not Found'
+            else:
+                print("ERROR: File/Method not found")
+                servResponse = 'HTTP1/0 404 NOT FOUND\n\nFile Not Found'
 
         client.sendall(servResponse.encode())
 
         client.close()
+
+#customize error messages
+#account for more errors
+    #not passing int as param
