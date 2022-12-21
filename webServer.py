@@ -1,49 +1,50 @@
 import os
 import socket
 
-def handleRequest(tcpSocket):
-    recvRequest = tcpSocket.recv(1024).decode()
-    headers = recvRequest.split('\n')
-    fileRequest = headers[0].split()[1]
+class WebServer:
+    def __init__(self,port):
+        self.port = port
 
-    if(fileRequest == "/" or fileRequest[-5:] != ".html"):
-        fileRequest = "index.html"
-    try:
-        file = open(os.getcwd() + "/" + fileRequest)
-        fileContent = file.read()
-        file.close()
+        print('Web Server starting on port: %d...' % (self.port))
 
-        servResponse = 'HTTP/1.0 200 OK\n\n' + fileContent
-    except:
-        servResponse = 'HTTP1/0 404 NOT FOUND\n\nFile Not Found'
+        servSocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 
-    tcpSocket.sendall(servResponse.encode())
+        try:
+            servSocket.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
 
-    tcpSocket.close()
+            servSocket.bind(('0.0.0.0',port))
 
-def main():
-    port = 8350
+            servSocket.listen(1)
 
-    print('Web Server starting on port: %d...' % (port))
+            while True:
+                connSocket,sourceAddr = servSocket.accept()
+                if(connSocket):
+                    print("%s connected" %(sourceAddr[0]))
+                    self.handleRequest(connSocket)
 
-    servSocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+        except Exception as e:
+            servSocket.close()
+            print(e)
 
-    try:
-        servSocket.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+    
 
-        servSocket.bind(('0.0.0.0',port))
+    def handleRequest(self,client):
+        request = client.recv(1024).decode()
+        headers = request.split('\n')
+        print("Request received: %s" %(headers[0]))
+        fileReq = headers[0].split()[1]
 
-        servSocket.listen(1)
+        if(fileReq == "/" or fileReq[-5:] != ".html"):
+            fileReq = "index.html"
+        try:
+            file = open(os.getcwd() + "/" + fileReq)
+            fileContent = file.read()
+            file.close()
 
-        while True:
-            connSocket,sourceAddr = servSocket.accept()
-            if(connSocket):
-                handleRequest(connSocket)
+            servResponse = 'HTTP/1.0 200 OK\n\n' + fileContent
+        except:
+            servResponse = 'HTTP1/0 404 NOT FOUND\n\nFile Not Found'
 
-    except Exception as e:
-        servSocket.close()
-        print(e)
+        client.sendall(servResponse.encode())
 
-
-if __name__ == "__main__":
-    main()
+        client.close()
