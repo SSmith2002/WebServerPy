@@ -6,10 +6,10 @@ def handleRequest(tcpSocket):
     headers = recvRequest.split('\n')
     fileRequest = headers[0].split()[1]
 
-    if(fileRequest == "/"):
+    if(fileRequest == "/" or fileRequest[-5:] != ".html"):
         fileRequest = "index.html"
     try:
-        file = open(os.getcwd() + "/localhost/" + fileRequest)
+        file = open(os.getcwd() + "/" + fileRequest)
         fileContent = file.read()
         file.close()
 
@@ -22,9 +22,9 @@ def handleRequest(tcpSocket):
     tcpSocket.close()
 
 def main():
-    port = 5000
+    port = 8350
 
-    print('Web Server starting on port: %i...' % (port))
+    print('Web Server starting on port: %d...' % (port))
 
     servSocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 
@@ -40,8 +40,9 @@ def main():
             if(connSocket):
                 handleRequest(connSocket)
 
-    except:
+    except Exception as e:
         servSocket.close()
+        print(e)
 
 
 if __name__ == "__main__":
