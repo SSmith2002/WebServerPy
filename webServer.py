@@ -35,7 +35,7 @@ class WebServer:
 
     def handleRequest(self,client):
         message = client.recv(1024)
-        request = ""
+        request = message.decode()
         while(len(message) == 1024):
             message = client.recv(1024)
             request += message.decode()
